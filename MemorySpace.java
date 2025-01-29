@@ -93,6 +93,11 @@ public class MemorySpace {
 	 */
 	public void free(int address) {
 		//// Write your code here
+		if (allocatedList.getSize() == 0){
+			throw new IllegalArgumentException (
+				"index must be between 0 and size"
+				);
+		}
 		Node current = allocatedList.getFirst();
         while (current != null) {
             MemoryBlock allocatedBlock = current.block;
