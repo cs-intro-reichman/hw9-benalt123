@@ -122,32 +122,37 @@ public class MemorySpace {
 	public void defrag() {
 		/// TODO: Implement defrag test
 		//// Write your code here
-		if (freeList.getSize() < 2) return;
-		Node current = freeList.getFirst();
-		while (current != null) {
-			Node compareNode = freeList.getFirst();
-			while (compareNode != null) {
-				if (current != compareNode) { 
-					MemoryBlock block1 = current.block;
-					MemoryBlock block2 = compareNode.block;
-	
-					// Check if block1 and block2 are adjacent in memory (either order)
+		if (freeList.getFirst() == null) return;
+
+		ListIterator iterator1 = new ListIterator(freeList.getFirst());
+
+		while (iterator1.hasNext()) {
+			MemoryBlock block1 = iterator1.current.block;
+
+			ListIterator iterator2 = new ListIterator(freeList.getFirst());
+
+			while (iterator2.hasNext()) {
+				MemoryBlock block2 = iterator2.current.block;
+
+				if (block1 != block2) {
 					if (block1.baseAddress + block1.length == block2.baseAddress) {
-						block1.length += block2.length; 
-						freeList.remove(compareNode);
-						current.block.length = block1.length;
-			
-						
-					} else if (block2.baseAddress + block2.length == block1.baseAddress) {
-						block2.length += block1.length; 
-						freeList.remove(current); 
-						compareNode.block.length = block2.length;
-						
+						block1.length += block2.length;
+						freeList.remove(iterator2.current);
+						iterator2 = new ListIterator(freeList.getFirst());
+					}
+					else if (block2.baseAddress + block2.length == block1.baseAddress) {
+						block2.length += block1.length;
+						freeList.remove(iterator1.current);
+						iterator1 = new ListIterator(freeList.getFirst());
+						break;
 					}
 				}
-				compareNode = compareNode.next; 
+
+				iterator2.next();
 			}
-			current = current.next; 
+
+			iterator1.next();
 		}
-	}	
+	}
+		
 }
