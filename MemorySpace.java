@@ -59,6 +59,27 @@ public class MemorySpace {
 	 */
 	public int malloc(int length) {		
 		//// Replace the following statement with your code
+		ListIterator iterator = new ListIterator(freeList.getFirst());
+
+		while (iterator.hasNext()) {
+			MemoryBlock blockIterator = iterator.current.block;
+			if (blockIterator.length >= length) {
+				int Address = blockIterator.baseAddress;
+				MemoryBlock allocatedBlock = new MemoryBlock(Address, length);
+				
+				allocatedList.addLast(allocatedBlock);
+				if (blockIterator.length == length) {
+					freeList.remove(blockIterator);
+				} else {
+					blockIterator.baseAddress += length;
+					blockIterator.length -=length;
+				}
+				return Address;
+			}
+			
+			iterator.next();
+		}
+		
 		return -1;
 	}
 
@@ -72,6 +93,17 @@ public class MemorySpace {
 	 */
 	public void free(int address) {
 		//// Write your code here
+		Node current = allocatedList.getFirst();
+        while (current != null) {
+            MemoryBlock allocatedBlock = current.block;
+            if (allocatedBlock.baseAddress == address) {
+                allocatedList.remove(current);
+                freeList.addLast(allocatedBlock);
+    
+                return; 
+            }
+            current = current.next; // Move to the next block
+        }
 	}
 	
 	/**
@@ -90,5 +122,32 @@ public class MemorySpace {
 	public void defrag() {
 		/// TODO: Implement defrag test
 		//// Write your code here
-	}
+		if (freeList.getSize() < 2) return;
+		Node current = freeList.getFirst();
+		while (current != null) {
+			Node compareNode = freeList.getFirst();
+			while (compareNode != null) {
+				if (current != compareNode) { 
+					MemoryBlock block1 = current.block;
+					MemoryBlock block2 = compareNode.block;
+	
+					// Check if block1 and block2 are adjacent in memory (either order)
+					if (block1.baseAddress + block1.length == block2.baseAddress) {
+						block1.length += block2.length; 
+						freeList.remove(compareNode);
+						current.block.length = block1.length;
+			
+						
+					} else if (block2.baseAddress + block2.length == block1.baseAddress) {
+						block2.length += block1.length; 
+						freeList.remove(current); 
+						compareNode.block.length = block2.length;
+						
+					}
+				}
+				compareNode = compareNode.next; 
+			}
+			current = current.next; 
+		}
+	}	
 }
